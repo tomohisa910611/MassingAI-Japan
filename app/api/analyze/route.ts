@@ -10,6 +10,7 @@ import {
   SitePlanSchema,
   validateTopology,
 } from "@/lib/site-plan";
+import { getVerifiedDemoPlan } from "@/lib/demo-data";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -18,60 +19,6 @@ const MAX_FILE_SIZE = 3 * 1024 * 1024;
 const SUPPORTED_TYPES = new Set(["image/png", "image/jpeg"]);
 const ANALYSIS_VERSION = "complete-boundary-multi-road-v7-project-scope";
 const CACHE_DIRECTORY = path.join(process.cwd(), ".analysis-cache");
-
-// 同じA-014図面でも、PDF変換・切り抜き方法の違いで画像ハッシュが変わる。
-// 人と元図面で確認済みの35点解析へ、対象ファイルを明示的に結び付ける。
-const VERIFIED_CACHE_ALIASES = new Map<string, string>([[
-  "57bd8f2673d66ae16fc781a72bc7135a7382592a4fc828a00a3bf27507bf24c9",
-  "e4e21ec9a4f0f0041e62a160630137992b098e13252ce5ff594be95ca71e5cb2",
-]]);
-
-function normalizeVerifiedPlan(imageHash: string, plan: SitePlan): SitePlan {
-  if (imageHash !== "57bd8f2673d66ae16fc781a72bc7135a7382592a4fc828a00a3bf27507bf24c9") return plan;
-  const correctedLengths = new Map([
-    ["B-C", 13.49],
-    ["C-D", 3.57],
-    ["I-J", 4.49],
-    ["V33-V34", 2.14],
-  ]);
-  return {
-    ...plan,
-    siteAreaSquareMeters: 6625.93,
-    edges: plan.edges.map((edge) => ({
-      ...edge,
-      lengthMeters: correctedLengths.get(`${edge.startVertexId}-${edge.endVertexId}`) ?? edge.lengthMeters,
-    })),
-    roads: [
-      {
-        legalClassification: null,
-        roadName: null,
-        widthMeters: 6.2,
-        positionDescription: "敷地北西側から北側へ続く1本の道路。接道辺: V35-A, A-B, B-C, C-D。幅員変化: V35-A=9.100, A-B=6.500, B-C=6.200, C-D=6.200。道路2とD点で接続。",
-        adjacentEdgeStartVertexId: "V35",
-        adjacentEdgeEndVertexId: "A",
-        confidence: 0.82,
-      },
-      {
-        legalClassification: null,
-        roadName: null,
-        widthMeters: 5.06,
-        positionDescription: "敷地北側から北東側へ続く1本の道路。接道辺: D-E, E-F, F-G, G-H, H-I, I-J。幅員変化: D-E=5.060, E-F=5.200, F-G=5.200, G-H=5.200, H-I=5.200, I-J=5.200。道路1とD点、道路3とJ点で接続。",
-        adjacentEdgeStartVertexId: "D",
-        adjacentEdgeEndVertexId: "E",
-        confidence: 0.9,
-      },
-      {
-        legalClassification: null,
-        roadName: null,
-        widthMeters: 9.09,
-        positionDescription: "敷地東側の道路。接道辺: J-K, K-L。幅員変化: J-K=9.090, K-L=9.180。道路2とJ点で接続。",
-        adjacentEdgeStartVertexId: "J",
-        adjacentEdgeEndVertexId: "K",
-        confidence: 0.88,
-      },
-    ],
-  };
-}
 
 // 人と元図面で照合済みの基準画像は、AIの再読取で確定値が揺れないよう固定する。
 const VERIFIED_REFERENCE_PLANS = new Map<string, SitePlan>([[
@@ -223,16 +170,9 @@ export async function POST(request: Request) {
 
     const bytes = Buffer.from(await file.arrayBuffer());
     const imageHash = createHash("sha256").update(bytes).digest("hex");
-    const verifiedPlan = VERIFIED_REFERENCE_PLANS.get(imageHash);
+    const verifiedPlan = getVerifiedDemoPlan(imageHash) ?? VERIFIED_REFERENCE_PLANS.get(imageHash);
     if (verifiedPlan) {
       return NextResponse.json({ plan: verifiedPlan, model: "verified-reference", verified: true });
-    }
-    const verifiedCacheKey = VERIFIED_CACHE_ALIASES.get(imageHash);
-    if (verifiedCacheKey) {
-      const verifiedCachedPlan = await readCachedPlan(verifiedCacheKey);
-      if (verifiedCachedPlan) {
-        return NextResponse.json({ plan: applyEvidenceQualityRules(normalizeVerifiedPlan(imageHash, verifiedCachedPlan)), model: "verified-cache", verified: true, cached: true });
-      }
     }
     const cacheKey = createHash("sha256").update(ANALYSIS_VERSION).update(analysisSessionId).update(bytes).digest("hex");
     const cachedPlan = await readCachedPlan(cacheKey);

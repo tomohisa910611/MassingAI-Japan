@@ -16,8 +16,8 @@ function writeAll(projects: SavedProject[]) {
 }
 
 export function listBrowserProjects(): ProjectSummary[] {
-  return readAll().map(({ id, caseName, displayName, createdAt, updatedAt, intendedUse }) =>
-    ({ id, caseName, displayName, createdAt, updatedAt, intendedUse }))
+  return readAll().map(({ id, caseName, displayName, createdAt, updatedAt, intendedUse, isDemo }) =>
+    ({ id, caseName, displayName, createdAt, updatedAt, intendedUse, isDemo }))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 

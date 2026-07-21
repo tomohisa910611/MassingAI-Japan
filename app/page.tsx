@@ -291,6 +291,11 @@ export default function Home() {
 
   async function deleteCurrentProject() {
     if (!currentProject) return;
+    if (currentProject.isDemo) {
+      setDeleteDialogOpen(false);
+      setProjectMessage("確認済みデモ案件は削除できません。");
+      return;
+    }
     setProjectBusy(true);
     try {
       const response = await fetch(`/api/projects?id=${encodeURIComponent(currentProject.id)}`, { method: "DELETE" });
@@ -334,7 +339,7 @@ export default function Home() {
   const projectActionButtons = (
     <div className="project-result-actions" aria-label={text("プロジェクト操作", "Project actions")}>
       <button type="button" className="secondary-button" disabled={!canSave || projectBusy} onClick={() => void saveCurrentProject()}>{text("プロジェクトを保存", "Save project")}</button>
-      <button type="button" className="delete-project-button" disabled={!currentProject || projectBusy} onClick={() => setDeleteDialogOpen(true)}>{text("プロジェクトを削除", "Delete project")}</button>
+      <button type="button" className="delete-project-button" disabled={!currentProject || currentProject.isDemo || projectBusy} onClick={() => setDeleteDialogOpen(true)}>{text("プロジェクトを削除", "Delete project")}</button>
     </div>
   );
 
@@ -349,7 +354,7 @@ export default function Home() {
           <form action="/" target="_blank"><button type="submit">{text("新規作成", "New")}</button></form>
           <button type="button" onClick={() => void showOpenDialog()} disabled={projectBusy}>{text("開く", "Open")}</button>
           <button type="button" onClick={() => void saveCurrentProject()} disabled={!canSave || projectBusy}>{text("保存", "Save")}</button>
-          <button type="button" onClick={() => setDeleteDialogOpen(true)} disabled={!currentProject || projectBusy}>{text("削除", "Delete")}</button>
+          <button type="button" onClick={() => setDeleteDialogOpen(true)} disabled={!currentProject || currentProject.isDemo || projectBusy}>{text("削除", "Delete")}</button>
         </nav>
         <div className="header-tools"><div className="language-switch" role="group" aria-label="Language"><button type="button" className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button type="button" className={language === "ja" ? "active" : ""} onClick={() => setLanguage("ja")}>日本語</button></div><span className="prototype-badge">Build Week prototype</span></div>
       </header>
@@ -470,7 +475,7 @@ export default function Home() {
           <div className="confirm-dialog project-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-project-title" onClick={(event) => event.stopPropagation()}>
             <h3 id="delete-project-title">{text("本当に削除しますか？", "Delete this project?")}</h3>
             <p>{text("保存したプロジェクトは元に戻せません。", "A deleted project cannot be restored.")}</p>
-            <div><button type="button" className="secondary-button" onClick={() => setDeleteDialogOpen(false)}>{text("いいえ", "No")}</button><button type="button" className="delete-project-confirm" onClick={() => void deleteCurrentProject()} disabled={projectBusy}>{text("はい", "Yes")}</button></div>
+            <div><button type="button" className="secondary-button" onClick={() => setDeleteDialogOpen(false)}>{text("いいえ", "No")}</button><button type="button" className="delete-project-confirm" onClick={() => void deleteCurrentProject()} disabled={projectBusy || currentProject?.isDemo}>{text("はい", "Yes")}</button></div>
           </div>
         </div>
       )}

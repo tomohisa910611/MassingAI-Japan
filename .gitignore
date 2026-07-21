@@ -10,6 +10,7 @@ out/
 .DS_Store
 coverage/
 *.tsbuildinfo
+key.png
 .analysis-cache/
 .regulation-cache/
 .vercel/

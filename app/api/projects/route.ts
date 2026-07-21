@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { deleteProject, getProject, listProjects, saveProject } from "@/lib/project-storage";
 import type { SavedProject } from "@/lib/projects";
+import { isDemoProjectId } from "@/lib/demo-data";
 
 export const runtime = "nodejs";
 
@@ -28,6 +29,7 @@ export async function DELETE(request: Request) {
   try {
     const id = validId(new URL(request.url).searchParams.get("id"));
     if (!id) return NextResponse.json({ error: "削除対象が不正です。" }, { status: 400 });
+    if (isDemoProjectId(id)) return NextResponse.json({ error: "確認済みデモ案件は削除できません。" }, { status: 403 });
     const storage = await deleteProject(id);
     return NextResponse.json({ deleted: true, storage });
   } catch (error) { console.error("Project deletion failed", error); return NextResponse.json({ error: "プロジェクトを削除できませんでした。" }, { status: 500 }); }

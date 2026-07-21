@@ -29,9 +29,11 @@ export type SavedProject = {
   plan: SitePlan;
   regulations: RegulationAnalysis;
   massingView: MassingViewState;
+  /** Bundled, immutable demonstration project available without external storage. */
+  isDemo?: boolean;
 };
 
-export type ProjectSummary = Pick<SavedProject, "id" | "caseName" | "displayName" | "createdAt" | "updatedAt" | "intendedUse">;
+export type ProjectSummary = Pick<SavedProject, "id" | "caseName" | "displayName" | "createdAt" | "updatedAt" | "intendedUse" | "isDemo">;
 
 export const DEFAULT_MASSING_VIEW: MassingViewState = {
   orbitEnabled: true,
