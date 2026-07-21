@@ -1,0 +1,16 @@
+node_modules/
+.npm-cache/
+.next/
+out/
+.env*
+!.env.example
+.env.local
+.env*.local
+*.log
+.DS_Store
+coverage/
+*.tsbuildinfo
+.analysis-cache/
+.regulation-cache/
+.vercel/
+.project-data/
