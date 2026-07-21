@@ -1,5 +1,11 @@
 # Development Log
 
+## Submission documentation audit
+
+Codex verified the production app, public repository, license, secret-file exclusions, tests, lint, TypeScript, and production build, then added judge-ready setup and architecture documentation to the README.
+The human supplied the final production, repository, and video links and chose the Work & Productivity track, while retaining final control over the Devpost submission and public presentation.
+Together we kept the verified no-API demo path explicit so judges can reproduce the core 2D, regulation, floor-height, 3D, and saved-project experience without API credits.
+
 ## Secure image-analysis pipeline
 
 Codex implemented the server-only GPT-5.6 call, image validation, and structured geometry response. The human defined the Japanese survey-drawing conventions, selected the sample, and limited the hackathon scope to one reliable first step.

@@ -1,5 +1,61 @@
 # MassingAI Japan
 
+## Live demo
+
+**Production:** https://massing-ai-japan.vercel.app/
+
+The production site opens in English by default and can be switched between English and Japanese.
+
+## Quick start
+
+Requirements: Node.js 20 or later.
+
+```bash
+npm install
+```
+
+Create `.env.local` from `.env.example`, then add the environment variables you need:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+```
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | Only for new, unregistered analyses | Sends a new site-plan image to GPT-5.6 Sol and searches official planning sources for an unregistered address. |
+| `BLOB_READ_WRITE_TOKEN` | Optional | Enables shared cloud project storage with Vercel Blob. Without it, development storage or browser fallback is used. |
+| `VERCEL_OIDC_TOKEN` | Automatic on supported Vercel environments | Detected automatically for Vercel Blob access; no manual local value is normally required. |
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000/.
+
+## Verified demos work without an API key
+
+Choose **Open** in the project menu to load either bundled verified demo. The verified site geometry, planning controls, saved project state, and 3D settings are embedded in the application. Judges can therefore review the complete 2D, regulation, floor-height, 3D, and project workflow without an OpenAI API key or API credits.
+
+An OpenAI API key is required only when analyzing a new drawing or an address that is not one of the bundled verified references.
+
+## How we built this
+
+GPT-5.6 Sol is used for multimodal understanding of Japanese site-survey drawings. The server sends the uploaded image with original-detail vision input and asks the model to structure the boundary vertices, side lengths, roads, site area, coordinate evidence, and true-north direction. The result is validated before it reaches the editable 2D and 3D interfaces.
+
+Codex implemented and repeatedly verified the Next.js application, server-only OpenAI integration, structured geometry validation, editable 2D boundary tools, regulatory calculations, interactive 3D massing, floor-height analysis, bilingual UI, project persistence, deterministic demo paths, automated tests, and Vercel/GitHub delivery.
+
+The human collaborator supplied Japanese architectural and survey-drawing knowledge, selected conservative legal assumptions, explained how designers interpret dimensions and road information, decided which uncertainty must remain visible, and reviewed every iteration from the perspective of a practicing architectural user. This division of work let Codex accelerate implementation while keeping product and domain decisions under human control.
+
+## Submission references
+
+- **Track:** OpenAI Build Week — Work & Productivity
+- **Demo video:** https://youtu.be/YZppVi1qEkw
+- **Source code:** https://github.com/tomohisa910611/MassingAI-Japan
+- **Detailed Codex collaboration record:** [DEVLOG.md](DEVLOG.md)
+
 敷地求積図を読み取り、住所・主要用途に関係する建築規制を調査し、安全側の建築可能ボリュームを3D算出するハッカソン用Webアプリです。
 
 ## 現在できること
